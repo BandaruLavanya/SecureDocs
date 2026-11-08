@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SecureDocs - Role Based Document Access</title>
+<style>
+body{font-family:Arial;text-align:center;background:#f4f6f8}
+.box{background:white;width:400px;margin:30px auto;padding:20px;border-radius:10px}
+button{padding:10px 15px;margin:5px;cursor:pointer}
+.doc{border:1px solid #ddd;padding:10px;margin:10px;border-radius:8px}
+</style>
+</head>
+<body>
+<h1>🔐 SecureDocs</h1>
+<p>Role Based Document Access - Secure File Sharing</p>
+<div class="box">
+<h3>Login As:</h3>
+<button onclick="login('Admin')">Admin</button>
+<button onclick="login('Manager')">Manager</button>
+<button onclick="login('Employee')">Employee</button>
+<h3 id="role">Please select role</h3>
+<div id="docs"></div>
+</div>
+<script>
+const allDocs=[
+{name:"Company Strategy.pdf",access:["Admin"]},
+{name:"Salary Report.xlsx",access:["Admin","Manager"]},
+{name:"Project Plan.docx",access:["Admin","Manager","Employee"]},
+{name:"Leave Policy.pdf",access:["Admin","Manager","Employee"]}
+];
+function login(role){
+document.getElementById("role").innerText="Logged in as: "+role;
+let html="";
+allDocs.forEach(d=>{
+if(d.access.includes(role)){
+html+=`<div class="doc">📄 ${d.name} <br><button>View</button> <button>Download</button></div>`;
+}else{
+html+=`<div class="doc">🔒 ${d.name} - Access Denied</div>`;
+}
+});
+document.getElementById("docs").innerHTML=html;
+}
+</script>
+</body>
+</html>
