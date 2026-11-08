@@ -1,44 +1,70 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>SecureDocs - Role Based Document Access</title>
+<title>SecureDocs - Role Based Access</title>
 <style>
-body{font-family:Arial;text-align:center;background:#f4f6f8}
-.box{background:white;width:400px;margin:30px auto;padding:20px;border-radius:10px}
-button{padding:10px 15px;margin:5px;cursor:pointer}
-.doc{border:1px solid #ddd;padding:10px;margin:10px;border-radius:8px}
+body{font-family:Arial;background:#eef2f7;margin:0}
+header{background:#0f172a;color:white;padding:20px;text-align:center}
+.box{max-width:650px;background:white;margin:20px auto;padding:20px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+button{padding:10px 16px;margin:5px;border:0;border-radius:8px;cursor:pointer;background:#0f172a;color:white}
+button.active{background:#16a34a}
+input{width:95%;padding:10px;border:1px solid #ccc;border-radius:8px}
+.doc{border:1px solid #ddd;padding:12px;margin:10px 0;border-radius:10px;display:flex;justify-content:space-between}
+.locked{background:#fef2f2}
+.log{font-size:13px;color:#555;background:#f8fafc;padding:10px;border-radius:8px}
 </style>
 </head>
 <body>
-<h1>🔐 SecureDocs</h1>
-<p>Role Based Document Access - Secure File Sharing</p>
+<header><h1>🔐 SecureDocs</h1><p>Role Based Document Access | Snovasys CRT Project</p></header>
 <div class="box">
-<h3>Login As:</h3>
-<button onclick="login('Admin')">Admin</button>
-<button onclick="login('Manager')">Manager</button>
-<button onclick="login('Employee')">Employee</button>
-<h3 id="role">Please select role</h3>
+<h3>Login As Role:</h3>
+<button onclick="login('Admin',this)">Admin</button>
+<button onclick="login('Manager',this)">Manager</button>
+<button onclick="login('Employee',this)">Employee</button>
+<p id="role">Please select your role to view documents</p>
+<input id="search" placeholder="🔍 Search document..." onkeyup="render()">
 <div id="docs"></div>
+<h3>📋 Audit Log - Who Accessed What</h3>
+<div id="audit" class="log">No activity yet.</div>
 </div>
 <script>
-const allDocs=[
-{name:"Company Strategy.pdf",access:["Admin"]},
-{name:"Salary Report.xlsx",access:["Admin","Manager"]},
-{name:"Project Plan.docx",access:["Admin","Manager","Employee"]},
-{name:"Leave Policy.pdf",access:["Admin","Manager","Employee"]}
+let current="Admin";
+let logs=[];
+const docs=[
+{name:"Company Strategy.pdf",access:["Admin"],size:"2.4 MB"},
+{name:"Salary Report.xlsx",access:["Admin","Manager"],size:"1.1 MB"},
+{name:"Project Plan.docx",access:["Admin","Manager","Employee"],size:"850 KB"},
+{name:"Leave Policy.pdf",access:["Admin","Manager","Employee"],size:"500 KB"}
 ];
-function login(role){
+function login(role,btn){
+current=role;
+document.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
+if(btn) btn.classList.add("active");
 document.getElementById("role").innerText="Logged in as: "+role;
+addLog(role+" logged in");
+render();
+}
+function render(){
+let q=document.getElementById("search").value.toLowerCase();
 let html="";
-allDocs.forEach(d=>{
-if(d.access.includes(role)){
-html+=`<div class="doc">📄 ${d.name} <br><button>View</button> <button>Download</button></div>`;
+docs.filter(d=>d.name.toLowerCase().includes(q)).forEach(d=>{
+if(d.access.includes(current)){
+html+=`<div class="doc"><div>📄 <b>${d.name}</b><br><small>${d.size} | Allowed</small></div><div><button onclick="viewDoc('${d.name}')">View</button></div></div>`;
 }else{
-html+=`<div class="doc">🔒 ${d.name} - Access Denied</div>`;
+html+=`<div class="doc locked"><div>🔒 <b>${d.name}</b><br><small>Access Denied for ${current}</small></div><div>🚫</div></div>`;
 }
 });
-document.getElementById("docs").innerHTML=html;
+document.getElementById("docs").innerHTML=html||"No documents found";
 }
+function viewDoc(name){
+addLog(current+" viewed "+name);
+alert("Opening "+name+" as "+current);
+}
+function addLog(msg){
+logs.unshift("• "+new Date().toLocaleTimeString()+" - "+msg);
+document.getElementById("audit").innerHTML=logs.join("<br>");
+}
+login("Admin");
 </script>
 </body>
 </html>
